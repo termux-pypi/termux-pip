@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "termux-pip"
+version = "0.1a1"
+description = ""
+readme = "README.md"
+requires-python = ">=3.10"
+license-files = ["LICENSE"]
+dependencies = [
+]
+authors = [
+  {name = "Loamfy", email = "termux-pypi@loamfy.com"}
+]
+maintainers = [
+  {name = "Loamfy", email = "termux-pypi@loamfy.com"}
+]
+
+[project.urls]
+Homepage = "https://github.com/termux-pypi/termux-pip"
+Repository = "https://github.com/termux-pypi/termux-pip"
+
+[project.scripts]
+tpip = "tpip:main"
