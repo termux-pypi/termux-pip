@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "termux-pip"
 version = "0.1a1"
-description = ""
+description = "CLI tool to configure the termux-pypi index and compile statically linked wheels"
 readme = "README.md"
 requires-python = ">=3.10"
 license-files = ["LICENSE"]
