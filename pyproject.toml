@@ -12,7 +12,7 @@ license-files = ['LICENSE']
 dependencies = [
 ]
 authors = [
-  {name = 'Loamfy', email = 'termux-pypi@loamfy.com'}
+  {name = 'Loamfy', email = 'admin@loamfy.com'}
 ]
 
 [tool.setuptools.dynamic]
