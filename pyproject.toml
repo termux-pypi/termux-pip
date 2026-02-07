@@ -14,9 +14,6 @@ dependencies = [
 authors = [
   {name = 'Loamfy', email = 'termux-pypi@loamfy.com'}
 ]
-maintainers = [
-  {name = 'Loamfy', email = 'termux-pypi@loamfy.com'}
-]
 
 [tool.setuptools.dynamic]
 version = {attr = "tpip.__version__"}
