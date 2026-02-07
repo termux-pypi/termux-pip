@@ -32,7 +32,7 @@ pip install numpy pandas pillow
 
 ---
 
-## 🧑‍🏭 **Advanced: Building Wheels** (`tpip build`)
+## **Advanced: Building Wheels** (`tpip build`)
 You can build packages locally using our **Recipe System**.
 
 `tpip build` automates the complex compilation process by pulling build recipes (patches, flags, and system dependencies) from our repository.
@@ -48,7 +48,7 @@ tpip build <package_name>
 
 ---
 
-## 🏗 How it works
+## How it works
 
 Normally, pip downloads source code and tries to compile it on your phone, which requires build tools and system libraries.
 
