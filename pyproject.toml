@@ -4,7 +4,7 @@ build-backend = 'setuptools.build_meta'
 
 [project]
 name = 'termux-pip'
-version = '0.1a1'
+dynamic = ["version"]
 description = 'CLI tool to configure the termux-pypi index and compile statically linked wheels'
 readme = 'README.md'
 requires-python = '>=3.10'
@@ -17,6 +17,9 @@ authors = [
 maintainers = [
   {name = 'Loamfy', email = 'termux-pypi@loamfy.com'}
 ]
+
+[tool.setuptools.dynamic]
+version = {attr = "tpip.__version__"}
 
 [project.urls]
 Homepage = 'https://github.com/termux-pypi/termux-pip'
