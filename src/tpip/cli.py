@@ -21,6 +21,7 @@ def main():
     # build
     parser_build = subparsers.add_parser('build', help='Build a package with patches')
     parser_build.add_argument('package', help='Path/URL to the recipe of the package to build')
+    parser_build.add_argument('-o', '--output', help='Destination of the completed .whl file', default=None)
 
     args = parser.parse_args()
 
@@ -28,7 +29,7 @@ def main():
         case 'setup':
             run_setup()
         case 'build':
-            run_build(args.package)
+            run_build(args.package, args.output)
         case _:
             parser.print_help()
             sys.exit(1)
