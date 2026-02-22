@@ -2,6 +2,7 @@ from ..utils import log_info, log_error
 from .wheel import download, unpack
 from ..tools.recipes import Recipes
 from importlib.util import find_spec
+from ..config import IS_TERMUX
 from typing import Optional
 import subprocess
 import tempfile
@@ -10,6 +11,10 @@ import os
 
 
 def run_build(link_or_file: str, output: Optional[str] = None):
+    if not IS_TERMUX:
+        log_error('Termux environment not detected. tpip must be run inside Termux or termux-docker.')
+        sys.exit(1)
+
     if not all(find_spec(name) for name in ['httpx', 'yaml']):
         log_error('Missing dependencies for build. Run: pip install tpip[build]')
         sys.exit(1)
