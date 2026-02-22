@@ -35,10 +35,10 @@ pip install numpy pandas pillow
 ## **Advanced: Building Wheels** (`tpip build`)
 You can build packages locally using our **Recipe System**.
 
-`tpip build` automates the complex compilation process by pulling build recipes (patches, flags, and system dependencies) from our repository.
+`tpip build` automates the complex compilation process by pulling build recipes (patches, flags, and system dependencies).
 ```
 tpip build <package_name>
-# Example: tpip build numpy
+# Example: tpip build https://github.com/termux-pypi/recipes/raw/refs/heads/main/recipes/ninja/1.13.2/recipe.yaml
 ```
 
 **What this command does**:
@@ -53,7 +53,7 @@ tpip build <package_name>
 Normally, pip downloads source code and tries to compile it on your phone, which requires build tools and system libraries.
 
 `tpip setup` changes your pip configuration to include the **Termux-PyPI** index. This repository hosts wheels that are:
-1.  **Pre-compiled** on GitHub Actions via Docker.
+1.  **Pre-compiled** on GitHub Actions.
 2.  **Repaired** to include all necessary dynamic libraries (like OpenBLAS) inside the wheel itself.
 
 ## ⚠️ Disclaimer
