@@ -1,3 +1,4 @@
+from __future__ import annotations
 from ..config import RECIPES_MAIN_URL
 from ..utils import log_error
 from typing import TypedDict, Optional
