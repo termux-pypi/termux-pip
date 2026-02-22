@@ -19,8 +19,8 @@ def main():
     subparsers.add_parser('setup', help='Configure pip to use Termux-PyPI index')
 
     # build
-    # parser_build = subparsers.add_parser('build', help='Build a package with patches')
-    # parser_build.add_argument('package', help='Name of the package to build (e.g., numpy)')
+    parser_build = subparsers.add_parser('build', help='Build a package with patches')
+    parser_build.add_argument('package', help='Path/URL to the recipe of the package to build')
 
     args = parser.parse_args()
 
