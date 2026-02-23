@@ -12,7 +12,7 @@
 
 ## 📦 Installation
 ```
-pip install tpip
+pip install termux-pip
 ```
 
 ## 🛠 Usage
