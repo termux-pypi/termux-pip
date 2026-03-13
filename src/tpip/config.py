@@ -3,7 +3,7 @@ import os
 IS_TERMUX = '/com.termux' in os.environ.get('PREFIX', '')
 
 RECIPES_MAIN_URL = 'https://raw.githubusercontent.com/termux-pypi/recipes/refs/heads/main'
-TERMUX_PYPI_URL = 'https://termux-pypi.github.io/index/'
+TERMUX_PYPI_URL = 'https://tpypi.loamfy-tools.workers.dev'
 
 # Path to the config file
 PIP_CONFIG_DIR = os.path.expanduser('~/.config/pip')
