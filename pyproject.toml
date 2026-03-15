@@ -31,7 +31,6 @@ build = [
     'pypi-simple',
     'packaging',
     'pyyaml',
-    'httpx',
     'tqdm'
 ]
 
