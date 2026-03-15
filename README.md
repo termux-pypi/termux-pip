@@ -37,14 +37,13 @@ You can build packages locally using our **Recipe System**.
 
 `tpip build` automates the complex compilation process by pulling build recipes (patches, flags, and system dependencies).
 ```
-tpip build <package_name>
-# Example: tpip build https://github.com/termux-pypi/recipes/raw/refs/heads/main/recipes/ninja/1.13.2/recipe.yaml
+tpip build <path_to_the_recipe>
+# Example: tpip build recipe.yaml
 ```
 
 **What this command does**:
-1. **Fetches Recipe**: Downloads the correct YAML recipe and patches (if available) for the package
-2. **Installs Deps**: Automatically runs `pkg install` for necessary build tools (clang, cmake, libs)
-3. **Patches & Builds**: Applies Android-specific patches (if available) and compiles the wheel locally
+1. **Installs Deps**: Automatically runs `pkg install` for necessary build tools (libopenblas, rust, ...)
+2. **Patches & Builds**: Applies Android-specific patches (if available) and compiles the wheel locally
 
 ---
 
@@ -53,7 +52,7 @@ tpip build <package_name>
 Normally, pip downloads source code and tries to compile it on your phone, which requires build tools and system libraries.
 
 `tpip setup` changes your pip configuration to include the **Termux-PyPI** index. This repository hosts wheels that are:
-1.  **Pre-compiled** on GitHub Actions.
+1.  **Pre-compiled**
 2.  **Repaired** to include all necessary dynamic libraries (like OpenBLAS) inside the wheel itself.
 
 ## ⚠️ Disclaimer
