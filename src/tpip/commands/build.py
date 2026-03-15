@@ -10,19 +10,19 @@ import sys
 import os
 
 
-def run_build(link_or_file: str, output: Optional[str] = None):
+def run_build(path: str, wheel_dir: Optional[str] = None):
     if not IS_TERMUX:
         log_error('Termux environment not detected. tpip must be run inside Termux or termux-docker.')
         sys.exit(1)
 
-    if not all(find_spec(name) for name in ['httpx', 'yaml']):
+    if not all(find_spec(name) for name in ['yaml']):
         log_error('Missing dependencies for build. Run: pip install tpip[build]')
         sys.exit(1)
 
-    recipe = Recipes.from_string(link_or_file)
+    recipe = Recipes.get(path)
     log_info(f'Starting build process for: {recipe['metadata']['name']}=={recipe['metadata']['version']}')
 
-    output_dir = output or os.getcwd()
+    wheel_dir = wheel_dir or os.getcwd()
     with tempfile.TemporaryDirectory() as tmp_dir:
         wheel = download(
             recipe['metadata']['name'],
@@ -77,7 +77,7 @@ def run_build(link_or_file: str, output: Optional[str] = None):
 
         try:
             subprocess.run(
-                [sys.executable, '-m', 'pip', 'wheel', source_code, '--verbose', '--wheel-dir', output_dir],
+                [sys.executable, '-m', 'pip', 'wheel', source_code, '--verbose', '--no-deps', '--wheel-dir', output_dir],
                 check=True,
                 env=build_env
             )
