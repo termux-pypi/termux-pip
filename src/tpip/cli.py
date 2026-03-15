@@ -20,8 +20,8 @@ def main():
 
     # build
     parser_build = subparsers.add_parser('build', help='Build a package with patches')
-    parser_build.add_argument('package', help='Path/URL to the recipe of the package to build')
-    parser_build.add_argument('-o', '--output', help='Destination of the completed .whl file', default=None)
+    parser_build.add_argument('recipe', help='Path to the recipe.yaml of the package to build')
+    parser_build.add_argument('-w', '--wheel-dir', help='Destination of the completed .whl file', default=None)
 
     args = parser.parse_args()
 

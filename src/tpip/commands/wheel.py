@@ -1,3 +1,4 @@
+from ..utils import log_success
 from typing import Optional
 from pathlib import Path
 import shutil
@@ -11,7 +12,7 @@ except ImportError as e:
     tqdm_progress_factory = ...
 
 
-def download(package_name: str, version: str, output: str = None):
+def download(package_name: str, version: str, wheel_dir: str = None):
     with PyPISimple() as pypi:
         package = pypi.get_project_page(package_name)
 
@@ -28,16 +29,16 @@ def download(package_name: str, version: str, output: str = None):
                     break
 
         if distribution_package:
-            if output:
-                output = os.path.join(output, distribution_package.filename)
+            if wheel_dir:
+                wheel_file = os.path.join(wheel_dir, distribution_package.filename)
             else:
-                output = os.path.join(os.getcwd(), distribution_package.filename)
+                wheel_file = os.path.join(os.getcwd(), distribution_package.filename)
 
             pypi.download_package(
-                distribution_package, path=output, progress=tqdm_progress_factory()
+                distribution_package, path=wheel_file, progress=tqdm_progress_factory()
             )
-            print(output)
-            return output
+            log_success(f'Downloaded: {wheel_file}')
+            return wheel_file
     return False
 
 
