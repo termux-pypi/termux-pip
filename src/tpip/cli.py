@@ -29,7 +29,7 @@ def main():
         case 'setup':
             run_setup()
         case 'build':
-            run_build(args.package, args.output)
+            run_build(args.recipe, args.wheel_dir)
         case _:
             parser.print_help()
             sys.exit(1)

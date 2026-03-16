@@ -19,7 +19,7 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
         log_error('Missing dependencies for build. Run: pip install tpip[build]')
         sys.exit(1)
 
-    recipe = Recipes.get(path)
+    recipe = Recipes().get(path)
     log_info(f'Starting build process for: {recipe['metadata']['name']}=={recipe['metadata']['version']}')
 
     wheel_dir = wheel_dir or os.getcwd()
@@ -27,7 +27,7 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
         wheel = download(
             recipe['metadata']['name'],
             recipe['metadata']['download_version'],
-            output=tmp_dir
+            wheel_dir=tmp_dir
         )
         if wheel is False:
             log_info('No source code or wheel found for this package in PyPI.')
@@ -77,7 +77,7 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
 
         try:
             subprocess.run(
-                [sys.executable, '-m', 'pip', 'wheel', source_code, '--verbose', '--no-deps', '--wheel-dir', output_dir],
+                [sys.executable, '-m', 'pip', 'wheel', source_code, '--verbose', '--no-deps', '--wheel-dir', wheel_dir],
                 check=True,
                 env=build_env
             )
