@@ -29,8 +29,8 @@ def run_setup():
 
     try:
         subprocess.run(set_cmd, check=True, capture_output=True, text=True)
-        log_success('Successfully updated pip configuration.')
         log_info(f'New extra-index-url list: {new_urls}')
+        log_success('Successfully updated pip configuration.')
     except subprocess.CalledProcessError as e:
         log_error(f'Failed to set config: {e.stderr}')
 
