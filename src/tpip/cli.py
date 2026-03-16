@@ -1,5 +1,6 @@
 from .commands.setup import run_setup
 from .commands.build import run_build
+from .commands.repair import run_repair
 from tpip import __version__
 import argparse
 import sys
@@ -23,6 +24,11 @@ def main():
     parser_build.add_argument('recipe', help='Path to the recipe.yaml of the package to build')
     parser_build.add_argument('-w', '--wheel-dir', help='Destination of the completed .whl file', default=None)
 
+    # repair
+    parser_repair = subparsers.add_parser('repair', help='Include system dependencies to the wheel')
+    parser_repair.add_argument('wheel', help='Path to the .whl file of the package to repair')
+    parser_repair.add_argument('-w', '--wheel-dir', help='Destination of the completed .whl file', default=None)
+
     args = parser.parse_args()
 
     match args.command:
@@ -30,6 +36,8 @@ def main():
             run_setup()
         case 'build':
             run_build(args.recipe, args.wheel_dir)
+        case 'repair':
+            run_repair(args.wheel, args.wheel_dir)
         case _:
             parser.print_help()
             sys.exit(1)
