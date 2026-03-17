@@ -48,14 +48,17 @@ def run_repair(wheel_path: str, output_dir: str = '.'):
     with tempfile.TemporaryDirectory() as tmp_dir:
         unpack(str(wheel_file), tmp_dir)
         unpacked_path = next(Path(tmp_dir).iterdir())
-        libs_dir = unpacked_path / f'{wheel_file.name.split('-')[0]}.libs'
+        libs_dir = unpacked_path / f"{wheel_file.name.split('-')[0]}.libs"
 
         extensions = list(unpacked_path.rglob('*.so'))
         if not extensions:
-            log_info('No compiled extensions found.')
-            return pack(str(unpacked_path), output_dir, None)
+            if output_dir.resolve() == wheel_file.resolve().parent:
+                log_info('No compiled extensions found. Original wheel is kept.')
+            else:
+                log_info('No compiled extensions found. Copying original wheel to destination...')
+                shutil.copy2(wheel_file, output_dir)
+            return str(output_dir / wheel_file.name)
 
-        libs_dir.mkdir(exist_ok=True)
         queue = extensions.copy()
         copied_libs = {}
 
@@ -70,6 +73,7 @@ def run_repair(wheel_path: str, output_dir: str = '.'):
                 termux_path = TERMUX_LIB_DIR / lib
                 if termux_path.exists():
                     if lib not in copied_libs:
+                        libs_dir.mkdir(exist_ok=True)
                         hashed_name = f'{termux_path.stem}-{uuid.uuid4().hex[:8]}{termux_path.suffix}'
                         dest_path = libs_dir / hashed_name
                         shutil.copy2(termux_path, dest_path)
@@ -77,17 +81,24 @@ def run_repair(wheel_path: str, output_dir: str = '.'):
 
                         log_info(f'Bundled: {lib} -> {hashed_name}')
                         queue.append(dest_path)
-
                     _patchelf(['--replace-needed', lib, copied_libs[lib], str(current_so)])
 
-        for so_file in unpacked_path.rglob('*.so'):
-            rel_path = os.path.relpath(libs_dir, so_file.parent)
-            new_rpath = '$ORIGIN' if rel_path == '.' else f'$ORIGIN/{rel_path}'
-            old_rpaths = _patchelf(['--print-rpath', str(so_file)]).split(':')
+        if copied_libs:
+            for so_file in unpacked_path.rglob('*.so'):
+                rel_path = os.path.relpath(libs_dir, so_file.parent)
+                new_rpath = '$ORIGIN' if rel_path == '.' else f'$ORIGIN/{rel_path}'
+                old_rpaths = _patchelf(['--print-rpath', str(so_file)]).split(':')
 
-            final_rpath = ':'.join(dict.fromkeys([new_rpath] + [p for p in old_rpaths if p]))
-            _patchelf(['--set-rpath', final_rpath, str(so_file)])
-
-        log_info('Repacking wheel...')
-        pack(str(unpacked_path), output_dir, None)
-        log_success(f'Repaired! Saved to {output_dir}')
+                final_rpath = ':'.join(dict.fromkeys([new_rpath] + [p for p in old_rpaths if p]))
+                _patchelf(['--set-rpath', final_rpath, str(so_file)])
+            log_info('Repacking wheel...')
+            pack(str(unpacked_path), output_dir, None)
+            log_success(f'Repaired! Saved to {output_dir}')
+            return str(output_dir / wheel_file.name)
+        else:
+            if output_dir.resolve() == wheel_file.resolve().parent:
+                log_info('No external libraries required. Original wheel is kept.')
+            else:
+                log_info('No external libraries required. Copying original wheel to destination...')
+                shutil.copy2(wheel_file, output_dir)
+            return str(output_dir / wheel_file.name)
