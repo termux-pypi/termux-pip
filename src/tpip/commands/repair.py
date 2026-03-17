@@ -1,5 +1,6 @@
-from wheel._commands.unpack import unpack
-from wheel._commands.pack import pack
+from ..utils import log_success, log_error, log_info
+from ..config import IS_TERMUX
+from importlib.util import find_spec
 from pathlib import Path
 import subprocess
 import tempfile
@@ -7,7 +8,13 @@ import shutil
 import uuid
 import sys
 import os
-from ..utils import log_success, log_info
+
+try:
+    from wheel._commands.unpack import unpack
+    from wheel._commands.pack import pack
+except ImportError as e:
+    unpack = ...
+    pack = ...
 
 TERMUX_PREFIX = Path(os.environ.get('PREFIX', '/data/data/com.termux/files/usr'))
 TERMUX_LIB_DIR = TERMUX_PREFIX / 'lib'
@@ -24,6 +31,14 @@ def _patchelf(args: list[str]):
         return ''
 
 def run_repair(wheel_path: str, output_dir: str = '.'):
+    if not IS_TERMUX:
+        log_error('Termux environment not detected. tpip must be run inside Termux or termux-docker.')
+        sys.exit(1)
+
+    if not all(find_spec(name) for name in ['wheel']):
+        log_error('Missing dependencies for repair. Run: pip install tpip[build]')
+        sys.exit(1)
+
     wheel_file = Path(wheel_path)
     log_info(f'Starting repair for: {wheel_file.name}')
 
