@@ -1,5 +1,6 @@
 from ..utils import log_info, log_error
 from .wheel import download, unpack
+from ..tools.get_current_arch import get_current_arch
 from ..tools.recipes import Recipes
 from importlib.util import find_spec
 from ..config import IS_TERMUX
@@ -20,6 +21,12 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
         sys.exit(1)
 
     recipe = Recipes().get(path)
+    current_arch = get_current_arch()
+
+    if current_arch in recipe['build'].get('exclude_arches', []):
+        log_info(f'Skipping: arch {current_arch} is excluded')
+        sys.exit(0)
+
     log_info(f'Starting build process for: {recipe['metadata']['name']}=={recipe['metadata']['version']}')
 
     wheel_dir = wheel_dir or os.getcwd()
@@ -75,9 +82,11 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
         build_env = os.environ.copy()
         build_env.update(recipe['build']['env'])
 
+        pip_args = recipe['build'].get('pip_args', [])
+
         try:
             subprocess.run(
-                [sys.executable, '-m', 'pip', 'wheel', source_code, '--verbose', '--no-deps', '--wheel-dir', wheel_dir],
+                [sys.executable, '-m', 'pip', 'wheel', source_code, '--verbose', '--no-deps', '--wheel-dir', wheel_dir, *pip_args],
                 check=True,
                 env=build_env
             )
