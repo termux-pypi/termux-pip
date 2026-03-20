@@ -26,7 +26,7 @@ EXCLUDE_PREFIXES = (
 
 def _patchelf(args: list[str]):
     try:
-        return subprocess.run(['patchelf', *args], capture_output=True, text=True, check=True).stdout.strip()
+        return subprocess.run(['patchelf', '--page-size', '16384', *args], capture_output=True, text=True, check=True).stdout.strip()
     except subprocess.CalledProcessError:
         return ''
 
