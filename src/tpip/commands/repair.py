@@ -74,9 +74,16 @@ def run_repair(wheel_path: str, output_dir: str = '.'):
                 if termux_path.exists():
                     if lib not in copied_libs:
                         libs_dir.mkdir(exist_ok=True)
-                        hashed_name = f'{termux_path.stem}-{uuid.uuid4().hex[:8]}{termux_path.suffix}'
+                        file_hash = uuid.uuid4().hex[:8]
+                        if '.so' in lib:
+                            prefix, suffix = lib.split('.so', 1)
+                            hashed_name = f"{prefix}-{file_hash}.so{suffix}"
+                        else:
+                            hashed_name = f"{termux_path.stem}-{file_hash}{termux_path.suffix}"
+
                         dest_path = libs_dir / hashed_name
                         shutil.copy2(termux_path, dest_path)
+                        _patchelf(['--set-soname', hashed_name, str(dest_path)])
                         copied_libs[lib] = hashed_name
 
                         log_info(f'Bundled: {lib} -> {hashed_name}')
