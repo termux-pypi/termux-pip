@@ -24,6 +24,15 @@ EXCLUDE_PREFIXES = (
     'libX11.so', 'libxcb.so', 'libGL.so', 'libtermux-exec.so', 'libiconv.so', 'libandroid-shmem.so'
 )
 
+def is_elf(path: Path) -> bool:
+    if not path.is_file() or path.is_symlink():
+        return False
+    try:
+        with open(path, 'rb') as f:
+            return f.read(4) == b'\x7fELF'
+    except Exception:
+        return False
+
 def _patchelf(args: list[str]):
     try:
         return subprocess.run(['patchelf', '--page-size', '16384', *args], capture_output=True, text=True, check=True).stdout.strip()
@@ -50,8 +59,8 @@ def run_repair(wheel_path: str, output_dir: str = '.'):
         unpacked_path = next(Path(tmp_dir).iterdir())
         libs_dir = unpacked_path / f"{wheel_file.name.split('-')[0]}.libs"
 
-        extensions = list(unpacked_path.rglob('*.so'))
-        if not extensions:
+        elf_files = [p for p in unpacked_path.rglob('*') if is_elf(p)]
+        if not elf_files:
             if output_dir.resolve() == wheel_file.resolve().parent:
                 log_info('No compiled extensions found. Original wheel is kept.')
             else:
@@ -59,7 +68,7 @@ def run_repair(wheel_path: str, output_dir: str = '.'):
                 shutil.copy2(wheel_file, output_dir)
             return str(output_dir / wheel_file.name)
 
-        queue = extensions.copy()
+        queue = elf_files.copy()
         copied_libs = {}
 
         while queue:
@@ -91,13 +100,14 @@ def run_repair(wheel_path: str, output_dir: str = '.'):
                     _patchelf(['--replace-needed', lib, copied_libs[lib], str(current_so)])
 
         if copied_libs:
-            for so_file in unpacked_path.rglob('*.so'):
-                rel_path = os.path.relpath(libs_dir, so_file.parent)
+            final_elf_files = [p for p in unpacked_path.rglob('*') if is_elf(p)]
+            for elf_file in final_elf_files:
+                rel_path = os.path.relpath(libs_dir, elf_file.parent)
                 new_rpath = '$ORIGIN' if rel_path == '.' else f'$ORIGIN/{rel_path}'
-                old_rpaths = _patchelf(['--print-rpath', str(so_file)]).split(':')
+                old_rpaths = _patchelf(['--print-rpath', str(elf_file)]).split(':')
 
                 final_rpath = ':'.join(dict.fromkeys([new_rpath] + [p for p in old_rpaths if p]))
-                _patchelf(['--set-rpath', final_rpath, str(so_file)])
+                _patchelf(['--set-rpath', final_rpath, str(elf_file)])
             log_info('Repacking wheel...')
             pack(str(unpacked_path), output_dir, None)
             log_success(f'Repaired! Saved to {output_dir}')
