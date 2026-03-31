@@ -5,11 +5,11 @@ build-backend = 'setuptools.build_meta'
 [project]
 name = 'termux-pip'
 dynamic = ['version']
-description = 'CLI tool to configure the termux-pypi index and compile dynamic (or statically linked) wheels'
+description = 'CLI tool to configure the termux-pypi index and compile dynamic wheels'
 readme = 'README.md'
 requires-python = '>=3.12'
 classifiers = [
-    'Development Status :: 2 - Pre-Alpha',
+    'Development Status :: 4 - Beta',
     'Topic :: Software Development :: Build Tools',
     'Topic :: Utilities',
     'License :: OSI Approved :: MIT License',
