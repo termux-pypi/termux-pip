@@ -4,8 +4,8 @@ from importlib.util import find_spec
 from pathlib import Path
 import subprocess
 import tempfile
+import hashlib
 import shutil
-import uuid
 import sys
 import os
 
@@ -83,7 +83,9 @@ def run_repair(wheel_path: str, output_dir: str = '.'):
                 if termux_path.exists():
                     if lib not in copied_libs:
                         libs_dir.mkdir(exist_ok=True)
-                        file_hash = uuid.uuid4().hex[:8]
+                        with open(termux_path, 'rb') as f:
+                            file_hash = hashlib.sha256(f.read()).hexdigest()[:8]
+
                         if '.so' in lib:
                             prefix, suffix = lib.split('.so', 1)
                             hashed_name = f"{prefix}-{file_hash}.so{suffix}"
