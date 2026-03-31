@@ -20,8 +20,8 @@ TERMUX_PREFIX = Path(os.environ.get('PREFIX', '/data/data/com.termux/files/usr')
 TERMUX_LIB_DIR = TERMUX_PREFIX / 'lib'
 EXCLUDE_PREFIXES = (
     'libc.so', 'libdl.so', 'libm.so', 'liblog.so', 'libz.so', 'libc++_shared.so',
-    'libandroid-support.so', 'libpython3', 'libcrypto.so', 'libssl.so', 'libffi.so',
-    'libX11.so', 'libxcb.so', 'libGL.so', 'libtermux-exec.so', 'libiconv.so', 'libandroid-shmem.so'
+    'libandroid-support.so', 'libandroid-glob.so',
+    'libpython3'
 )
 
 def is_elf(path: Path) -> bool:
