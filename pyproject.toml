@@ -28,6 +28,7 @@ version = {attr = 'tpip.__version__'}
 
 [project.optional-dependencies]
 build = [
+    'pydantic-core==2.41.5',  # force to skip pydantic-core from pypi-simple
     'pypi-simple',
     'packaging',
     'pyyaml',
