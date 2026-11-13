@@ -1,6 +1,7 @@
 from __future__ import annotations
 from ..config import RECIPES_MAIN_URL
-from ..utils import log_error
+from ..utils import log_error, log_info
+from ..security import validate_recipe, SecurityError
 from typing import TypedDict
 from pathlib import Path
 import sys
@@ -38,11 +39,19 @@ class Recipes:
         try:
             with open(path) as f:
                 recipe: TypedRecipe = yaml.safe_load(f.read())
+
+            # Validate recipe security before processing
+            validate_recipe(recipe)
+            log_info('Recipe validation passed')
+
             recipe_dir = str(Path(path).parent.resolve())
             recipe['build']['patches'] = self._get_patches(recipe, recipe_dir)
             return recipe
+        except SecurityError as e:
+            log_error(f'Security validation failed: {e}')
+            sys.exit(1)
         except Exception as e:
-            log_error(f'Error loading recipe.yaml for {package}=={version}: {e}')
+            log_error(f'Error loading recipe: {e}')
             sys.exit(1)
 
 

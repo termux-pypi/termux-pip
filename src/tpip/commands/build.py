@@ -43,7 +43,16 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
             log_info('Build system currently does not support .whl')
             sys.exit(1)
         unpacked = unpack(wheel, tmp_dir)
-        source_code = os.path.join(unpacked, f'{recipe['metadata']['name']}-{recipe['metadata']['download_version']}')
+
+        package_dir = f'{recipe["metadata"]["name"]}-{recipe["metadata"]["download_version"]}'
+        source_code = os.path.join(unpacked, package_dir)
+
+        # Verify the path is actually inside tmp_dir (prevent path traversal)
+        source_code_real = os.path.realpath(source_code)
+        tmp_dir_real = os.path.realpath(tmp_dir)
+        if not source_code_real.startswith(tmp_dir_real):
+            log_error(f'Security error: Path traversal detected in package directory')
+            sys.exit(1)
 
         log_info('Checking for system dependencies...')
 
