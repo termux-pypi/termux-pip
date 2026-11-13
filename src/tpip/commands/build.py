@@ -1,10 +1,11 @@
-from ..utils import log_info, log_error
+from ..utils import log_info, log_error, log_success
 from .wheel import download, unpack
 from ..tools.get_current_arch import get_current_arch
 from ..tools.recipes import Recipes
 from importlib.util import find_spec
 from ..config import IS_TERMUX
 from typing import Optional
+from pathlib import Path
 import subprocess
 import tempfile
 import sys
@@ -16,8 +17,8 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
         log_error('Termux environment not detected. tpip must be run inside Termux or termux-docker.')
         sys.exit(1)
 
-    if not all(find_spec(name) for name in ['yaml']):
-        log_error('Missing dependencies for build. Run: pip install tpip[build]')
+    if not all(find_spec(name) for name in ['yaml', 'pypi_simple', 'tqdm']):
+        log_error('Missing dependencies for build. Run: pip install termux-pip[build]')
         sys.exit(1)
 
     recipe = Recipes().get(path)
@@ -34,10 +35,11 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
         wheel = download(
             recipe['metadata']['name'],
             recipe['metadata']['download_version'],
-            wheel_dir=tmp_dir
+            wheel_dir=tmp_dir,
+            prefer='sdist'
         )
         if wheel is False:
-            log_info('No source code or wheel found for this package in PyPI.')
+            log_error('No source distribution (sdist) found for this package on PyPI.')
             sys.exit(1)
         if wheel.endswith('.whl'):
             log_info('Build system currently does not support .whl')
@@ -48,10 +50,8 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
         source_code = os.path.join(unpacked, package_dir)
 
         # Verify the path is actually inside tmp_dir (prevent path traversal)
-        source_code_real = os.path.realpath(source_code)
-        tmp_dir_real = os.path.realpath(tmp_dir)
-        if not source_code_real.startswith(tmp_dir_real):
-            log_error(f'Security error: Path traversal detected in package directory')
+        if not Path(source_code).resolve().is_relative_to(Path(tmp_dir).resolve()):
+            log_error('Security error: Path traversal detected in package directory')
             sys.exit(1)
 
         log_info('Checking for system dependencies...')
@@ -101,3 +101,6 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
             )
         except subprocess.CalledProcessError:
             log_error(f'Failed to build {recipe['metadata']['name']}=={recipe['metadata']['download_version']}')
+            sys.exit(1)
+
+        log_success(f'Built {recipe['metadata']['name']}=={recipe['metadata']['version']}. Wheel saved to {wheel_dir}')

@@ -40,11 +40,12 @@ class Recipes:
             with open(path) as f:
                 recipe: TypedRecipe = yaml.safe_load(f.read())
 
+            recipe_dir = str(Path(path).parent.resolve())
+
             # Validate recipe security before processing
-            validate_recipe(recipe)
+            validate_recipe(recipe, recipe_dir)
             log_info('Recipe validation passed')
 
-            recipe_dir = str(Path(path).parent.resolve())
             recipe['build']['patches'] = self._get_patches(recipe, recipe_dir)
             return recipe
         except SecurityError as e:

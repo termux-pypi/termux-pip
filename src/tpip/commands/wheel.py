@@ -12,7 +12,12 @@ except ImportError as e:
     tqdm_progress_factory = ...
 
 
-def download(package_name: str, version: str, wheel_dir: str = None):
+def download(package_name: str, version: str, wheel_dir: str = None, prefer: str = 'wheel'):
+    """Download a distribution from PyPI.
+
+    prefer='wheel': a pure-python (none-any) wheel wins over the sdist.
+    prefer='sdist': only the sdist is considered (used by `tpip build`).
+    """
     with PyPISimple() as pypi:
         package = pypi.get_project_page(package_name)
 
@@ -22,8 +27,10 @@ def download(package_name: str, version: str, wheel_dir: str = None):
         for pkg in matches_version:
             if pkg.package_type == 'sdist':
                 distribution_package = pkg
+                if prefer == 'sdist':
+                    break
                 continue
-            if pkg.package_type == 'wheel':
+            if pkg.package_type == 'wheel' and prefer == 'wheel':
                 if 'none-any.whl' in pkg.filename:
                     distribution_package = pkg
                     break
@@ -55,7 +62,7 @@ def unpack(file_path: str, output_dir: str = None):
         case '.gz':
             if not output_dir:
                 output_dir = path.name.split('.tar.gz')[0]
-            shutil.unpack_archive(file_path, output_dir)
+            shutil.unpack_archive(file_path, output_dir, filter='data')
         case _:
             raise ValueError(f'Unsupported format: {path.name}')
     return Path(output_dir).resolve()

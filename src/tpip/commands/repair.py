@@ -45,7 +45,7 @@ def run_repair(wheel_path: str, output_dir: str = '.'):
         sys.exit(1)
 
     if not all(find_spec(name) for name in ['wheel']):
-        log_error('Missing dependencies for repair. Run: pip install tpip[build]')
+        log_error('Missing dependencies for repair. Run: pip install termux-pip[build]')
         sys.exit(1)
 
     wheel_file = Path(wheel_path)
