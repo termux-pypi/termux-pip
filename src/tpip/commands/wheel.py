@@ -5,11 +5,11 @@ import shutil
 import os
 
 try:
-    from pypi_simple import PyPISimple, DistributionPackage, tqdm_progress_factory
+    from unearth import PackageFinder
+    from unearth.evaluator import Package
 except ImportError as e:
-    PyPISimple = ...
-    DistributionPackage = ...
-    tqdm_progress_factory = ...
+    PackageFinder = ...
+    Package = ...
 
 
 def download(package_name: str, version: str, wheel_dir: str = None, prefer: str = 'wheel'):
@@ -18,34 +18,29 @@ def download(package_name: str, version: str, wheel_dir: str = None, prefer: str
     prefer='wheel': a pure-python (none-any) wheel wins over the sdist.
     prefer='sdist': only the sdist is considered (used by `tpip build`).
     """
-    with PyPISimple() as pypi:
-        package = pypi.get_project_page(package_name)
+    finder = PackageFinder(
+        index_urls=['https://pypi.org/simple/'],
+        no_binary=[package_name] if prefer == 'sdist' else [],
+    )
+    matches = finder.find_best_match(f'{package_name}=={version}')
 
-        matches_version = [package for package in package.packages if package.version == version]
+    distribution_package: Optional[Package] = None
+    for pkg in matches.applicable:
+        filename = pkg.link.filename
+        if not filename.endswith('.whl'):
+            distribution_package = pkg
+            if prefer == 'sdist':
+                break
+            continue
+        if prefer == 'wheel' and 'none-any.whl' in filename:
+            distribution_package = pkg
+            break
 
-        distribution_package: Optional[DistributionPackage] = None
-        for pkg in matches_version:
-            if pkg.package_type == 'sdist':
-                distribution_package = pkg
-                if prefer == 'sdist':
-                    break
-                continue
-            if pkg.package_type == 'wheel' and prefer == 'wheel':
-                if 'none-any.whl' in pkg.filename:
-                    distribution_package = pkg
-                    break
-
-        if distribution_package:
-            if wheel_dir:
-                wheel_file = os.path.join(wheel_dir, distribution_package.filename)
-            else:
-                wheel_file = os.path.join(os.getcwd(), distribution_package.filename)
-
-            pypi.download_package(
-                distribution_package, path=wheel_file, progress=tqdm_progress_factory()
-            )
-            log_success(f'Downloaded: {wheel_file}')
-            return wheel_file
+    if distribution_package:
+        target_dir = wheel_dir if wheel_dir else os.getcwd()
+        wheel_file = str(finder.download(distribution_package.link, target_dir))
+        log_success(f'Downloaded: {wheel_file}')
+        return wheel_file
     return False
 
 

@@ -28,8 +28,8 @@ version = {attr = 'tpip.__version__'}
 
 [project.optional-dependencies]
 build = [
-    'pypi-simple',
     'packaging',
+    'unearth',
     'pyyaml',
     'wheel',
     'tqdm'

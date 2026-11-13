@@ -17,7 +17,7 @@ def run_build(path: str, wheel_dir: Optional[str] = None):
         log_error('Termux environment not detected. tpip must be run inside Termux or termux-docker.')
         sys.exit(1)
 
-    if not all(find_spec(name) for name in ['yaml', 'pypi_simple', 'tqdm']):
+    if not all(find_spec(name) for name in ['yaml', 'unearth', 'tqdm']):
         log_error('Missing dependencies for build. Run: pip install termux-pip[build]')
         sys.exit(1)
 
